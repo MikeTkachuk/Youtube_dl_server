@@ -13,7 +13,7 @@ secret_key = cryptography.fernet.Fernet.generate_key()
 save_path = r'downloads/'
 
 ytdl_params = {
-    'outtmpl': save_path + '%(title)s.%(ext)s',
+    'outtmpl': save_path + '%(title)s_not_ready.%(ext)s',
     'updatetime': False,
 
     'format': 'bestaudio/best',
@@ -31,8 +31,8 @@ def cleaner_func():
     while True:
         time.sleep(1800)
         try:
-            for i in os.listdir(app.root_path+'/downloads'):
-                os.remove(os.path.join(app.root_path,'downloads', i))
+            for i in os.listdir(app.root_path + '/to_delete'):
+                os.remove(os.path.join(app.root_path, 'to_delete', i))
         except Exception as e:
             print(e)
         finally:
@@ -50,12 +50,30 @@ def index():
     return render_template('index.html')
 
 
+def download_from_info(info, filename, receipt):
+    out = ytdl.process_ie_result(info)
+    os.renames(os.path.join(app.root_path, filename), os.path.join(app.root_path, receipt))
+    return out
+
+
+@app.route('/get_receipt')
+def get_receipt():
+    url = request.args.get('url')
+    info = ytdl.extract_info(url, download=False)
+    filename = ''.join(ytdl.prepare_filename(info).split('.')[:-1]) + '.mp3'
+    receipt = filename.replace('_not_ready', '')
+    downloader_process = multiprocessing.Process(target=download_from_info, args=(info, filename, receipt))
+    downloader_process.start()
+    return receipt
+
+
 @app.route('/get_url')
 def get_url():
-    url = request.args.get('url')
-    info = ytdl.extract_info(url, download=True)
-    filename = ''.join(ytdl.prepare_filename(info).split('.')[:-1]) + '.mp3'
-    return get_encoded_filepath(filename)
+    receipt = request.args.get('receipt')
+    if os.path.exists(os.path.join(app.root_path, receipt)):
+        return get_encoded_filepath(receipt)
+    else:
+        return '0'
 
 
 def get_encoded_filepath(filename):
@@ -70,7 +88,14 @@ def get_filepath(url):
 @app.route('/get_data/<url>')
 def get_data(url):
     filename = get_filepath(url)
-    out = send_file(filename, as_attachment=True)
+    (head, file) = os.path.split(filename)
+    (head, _) = os.path.split(head)
+    new_filename = os.path.join(head, 'to_delete', file)
+    try:
+        os.renames(os.path.join(app.root_path, filename), os.path.join(app.root_path, new_filename))
+    except FileExistsError:
+        os.remove(os.path.join(app.root_path, filename))
+    out = send_file(new_filename, as_attachment=True)
     return out
 
 
