@@ -46,6 +46,7 @@ def init_downloads_cleaner():
 
 @app.before_first_request
 def init_secret_key():
+    print('||||||||||||||||||||||||||||| setting secret key')
     app.secret_key = cryptography.fernet.Fernet.generate_key()
 
 
