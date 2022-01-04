@@ -60,7 +60,7 @@ def download_from_info(info, filename, receipt):
 def get_receipt():
     url = request.args.get('url')
     info = ytdl.extract_info(url, download=False)
-    filename = ''.join(ytdl.prepare_filename(info).split('.')[:-1]) + '.mp3'
+    filename = '.'.join(ytdl.prepare_filename(info).split('.')[:-1]) + '.mp3'
     receipt = filename.replace('_not_ready', '')
     downloader_process = multiprocessing.Process(target=download_from_info, args=(info, filename, receipt))
     downloader_process.start()
@@ -73,7 +73,7 @@ def get_url():
     if os.path.exists(os.path.join(app.root_path, receipt)):
         return get_encoded_filepath(receipt)
     else:
-        return '0'
+        return ""
 
 
 def get_encoded_filepath(filename):

@@ -27,7 +27,7 @@ function make_order(){
 			url_req.open('get',`/get_url?${url_params.toString()}`);
 			
 			url_req.onload = async () => {
-				if(url_req.responseText!='0'){
+				if(url_req.responseText!=""){
 					file_url = url_req.responseText;
 					url_ready = true;
 				};
