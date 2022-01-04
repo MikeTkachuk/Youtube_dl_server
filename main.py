@@ -9,7 +9,7 @@ from flask import render_template, redirect, url_for, request, jsonify, send_fro
 
 app = flask.Flask(__name__)
 
-secret_key = cryptography.fernet.Fernet.generate_key()
+app.secret_key = cryptography.fernet.Fernet.generate_key()
 save_path = r'downloads/'
 
 ytdl_params = {
@@ -77,16 +77,16 @@ def get_url():
 
 
 def get_encoded_filepath(filename):
-    print(f'Encoding:\nkey:{secret_key}')
-    encoder = cryptography.fernet.Fernet(secret_key)
+    print(f'Encoding:\nkey:{app.secret_key}')
+    encoder = cryptography.fernet.Fernet(app.secret_key)
     encoded = encoder.encrypt(filename.encode('utf-8'))
     print(f'encoded:{encoded}')
     return encoded
 
 
 def get_filepath(url):
-    print(f'Decoding:\nkey:{secret_key}')
-    decoded = cryptography.fernet.Fernet(secret_key).decrypt(url.encode('utf-8')).decode('utf-8')
+    print(f'Decoding:\nkey:{app.secret_key}')
+    decoded = cryptography.fernet.Fernet(app.secret_key).decrypt(url.encode('utf-8')).decode('utf-8')
     print(f'decoded:{decoded}')
     return decoded
 
