@@ -8,6 +8,7 @@ import flask
 from flask import render_template, redirect, url_for, request, jsonify, send_from_directory, send_file
 
 app = flask.Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'F_hj658g_Ii0ay0LW_4ob3Iy6rTGDHYoOkof07HcHsM=').encode('utf-8')
 
 save_path = r'downloads/'
 
@@ -42,12 +43,6 @@ def cleaner_func():
 def init_downloads_cleaner():
     process = multiprocessing.Process(target=cleaner_func, args=())
     process.start()
-
-
-@app.before_first_request
-def init_secret_key():
-    print('||||||||||||||||||||||||||||| setting secret key')
-    app.secret_key = cryptography.fernet.Fernet.generate_key()
 
 
 @app.route('/')
