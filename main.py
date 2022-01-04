@@ -77,12 +77,18 @@ def get_url():
 
 
 def get_encoded_filepath(filename):
+    print(f'Encoding:\nkey:{secret_key}')
     encoder = cryptography.fernet.Fernet(secret_key)
-    return encoder.encrypt(filename.encode('utf-8'))
+    encoded = encoder.encrypt(filename.encode('utf-8'))
+    print(f'encoded:{encoded}')
+    return encoded
 
 
 def get_filepath(url):
-    return cryptography.fernet.Fernet(secret_key).decrypt(url.encode('utf-8')).decode('utf-8')
+    print(f'Decoding:\nkey:{secret_key}')
+    decoded = cryptography.fernet.Fernet(secret_key).decrypt(url.encode('utf-8')).decode('utf-8')
+    print(f'decoded:{decoded}')
+    return decoded
 
 
 @app.route('/get_data/<url>')
